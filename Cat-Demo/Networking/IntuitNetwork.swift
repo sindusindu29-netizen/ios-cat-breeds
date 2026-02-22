@@ -1,0 +1,160 @@
+// Copyright © 2021 Intuit, Inc. All rights reserved.
+import Foundation
+import UIKit
+
+/// Network interface
+class Network {
+    
+    /// Errors from network responses
+    ///
+    /// - badUrl: URL could not be created
+    /// - responseError: The request was unsuccessful due to an error
+    /// - responseNoData: The request returned no usable data
+    enum NetworkError: Int {
+        case badUrl
+        case responseError
+        case responseNoData
+        case decodeError
+    }
+    
+    /// FetchCatBreeds - retrieve a list of cat breeds from The Cat API
+    ///
+    /// - Parameter completion: Closure that returns CatBreed on success, an Error on failure
+//    class func fetchCatBreeds(completion: @escaping (Swift.Result<[CatBreed], Error>) -> Void) {
+//        
+//        /// Create the URL for the request
+//        guard let url = URL(string: "https://api.thecatapi.com/v1/breeds?limit=10&page=0") else {
+//            let error = NSError(domain: "Network.fetchCats", code: NetworkError.badUrl.rawValue, userInfo: nil)
+//            return completion(Result.failure(error))
+//        }
+//        
+//        /// Start a data task for the URL
+//        URLSession.shared.dataTask(with: url) { (data, _, error) in
+//            /// Check against errors
+//            guard error == nil else {
+//                let error = NSError(domain: "Network.fetchCats", code: NetworkError.responseError.rawValue, userInfo: nil)
+//                return completion(Result.failure(error))
+//            }
+//            
+//            /// Check for non-nil response data
+//            guard let data = data else {
+//                let error = NSError(domain: "Network.fetchCats", code: NetworkError.responseNoData.rawValue, userInfo: nil)
+//                return completion(Result.failure(error))
+//            }
+//            
+//            do {
+//                let breeds: [CatBreed]
+//                
+//                /// Decode the JSON response into a CatBreed object array
+//                breeds = try JSONDecoder().decode([CatBreed].self, from: data)
+//                
+//                /// Return the data
+//                completion(.success(breeds))
+//
+//            } catch {
+//                /// Unable to decode the response
+//                let error = NSError(domain: "Network.decode", code: NetworkError.decodeError.rawValue, userInfo: nil)
+//                return completion(Result.failure(error))
+//            }
+//        }.resume()
+//    }
+    
+    class func fetchCatBreeds(completion: @escaping (Swift.Result<[CatBreed], Error>) -> Void) {
+
+        let limit = 50
+        var page = 0
+        var allBreeds: [CatBreed] = []
+
+        func fetchNextPage() {
+            guard let url = URL(string: "https://api.thecatapi.com/v1/breeds?limit=\(limit)&page=\(page)") else {
+                let error = NSError(domain: "Network.fetchCats", code: NetworkError.badUrl.rawValue, userInfo: nil)
+                return completion(.failure(error))
+            }
+
+            URLSession.shared.dataTask(with: url) { (data, _, error) in
+                guard error == nil else {
+                    let error = NSError(domain: "Network.fetchCats", code: NetworkError.responseError.rawValue, userInfo: nil)
+                    return completion(.failure(error))
+                }
+
+                guard let data = data else {
+                    let error = NSError(domain: "Network.fetchCats", code: NetworkError.responseNoData.rawValue, userInfo: nil)
+                    return completion(.failure(error))
+                }
+
+                do {
+                    let breeds = try JSONDecoder().decode([CatBreed].self, from: data)
+                    allBreeds.append(contentsOf: breeds)
+
+                    if breeds.count < limit {
+                        completion(.success(allBreeds))
+                    } else {
+                        page += 1
+                        fetchNextPage()
+                    }
+                } catch {
+                    let error = NSError(domain: "Network.decode", code: NetworkError.decodeError.rawValue, userInfo: nil)
+                    return completion(.failure(error))
+                }
+
+            }.resume()
+        }
+
+        fetchNextPage()
+    }
+    
+    /// Fetch a cat image
+    /// - Parameters:
+    ///   - breedId: The breed ID (retrieved from the `fetchCatBreeds` call
+    ///   - completion: Returns a UIImage or Error
+    class func fetchCatImage(breedId: String, completion: @escaping (Swift.Result<UIImage, Error>) -> Void) {
+
+        guard let url = URL(string: "https://api.thecatapi.com/v1/images/search?breed_ids=\(breedId)&include_breeds=true") else {
+            let error = NSError(domain: "Network.fetchCatDetails", code: NetworkError.badUrl.rawValue, userInfo: nil)
+            return completion(Result.failure(error))
+        }
+        
+        URLSession.shared.dataTask(with: url) { (data, _, error) in
+            guard error == nil else {
+                let error = NSError(domain: "Network.fetchCatDetails", code: NetworkError.responseError.rawValue, userInfo: nil)
+                return completion(Result.failure(error))
+            }
+            
+            guard let data = data else {
+                let error = NSError(domain: "Network.fetchCatDetails", code: NetworkError.responseNoData.rawValue, userInfo: nil)
+                return completion(Result.failure(error))
+            }
+            
+            do {
+                let catDetails: [CatDetails]
+                
+                catDetails = try JSONDecoder().decode([CatDetails].self, from: data)
+                
+                guard let catDetailImageUrl = catDetails.first?.url else {
+                    let error = NSError(domain: "Network.fetchCatDetails", code: NetworkError.responseNoData.rawValue, userInfo: nil)
+                    return completion(Result.failure(error))
+                }
+                
+                guard let catImageUrl = URL(string: catDetailImageUrl) else {
+                    let error = NSError(domain: "Network.fetchCatDetails", code: NetworkError.responseNoData.rawValue, userInfo: nil)
+                    return completion(Result.failure(error))
+                }
+                
+                let imageData = try Data(contentsOf: catImageUrl)
+                
+                guard let image = UIImage(data: imageData) else {
+                    let error = NSError(domain: "Network.fetchCatDetails", code: NetworkError.responseNoData.rawValue, userInfo: nil)
+                    return completion(Result.failure(error))
+                }
+                
+                completion(.success(image))
+
+            } catch {
+
+                let error = NSError(domain: "Network.decode", code: NetworkError.decodeError.rawValue, userInfo: nil)
+                return completion(Result.failure(error))
+            }
+
+        }.resume()
+    }
+}
