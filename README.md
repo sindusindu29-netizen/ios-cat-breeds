@@ -31,15 +31,14 @@
 ### 5. Sreenshots
 
 <p align="center">
-  <img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 Pro - 2026-02-21 at 19 09 57" src="https://github.com/user-attachments/assets/dcfa7a96-999f-46ab-96b8-a65c2265ff79" />
-  <img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 Pro - 2026-02-21 at 19 10 25" src="https://github.com/user-attachments/assets/b4807606-689e-4bd7-9dac-063333023a7b" />
-    <img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 Pro - 2026-02-21 at 19 10 38" src="https://github.com/user-attachments/assets/2a1ad2d1-a566-4d7c-8d6d-b47133521336" />  
+  <img src="https://github.com/user-attachments/assets/dcfa7a96-999f-46ab-96b8-a65c2265ff79" width="30%" />
+  <img src="https://github.com/user-attachments/assets/b4807606-689e-4bd7-9dac-063333023a7b" width="30%" />
+  <img src="https://github.com/user-attachments/assets/2a1ad2d1-a566-4d7c-8d6d-b47133521336" width="30%" />
 </p>
 
 <p align="center">
-   <img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 Pro - 2026-02-21 at 19 10 38" src="https://github.com/user-attachments/assets/ae384474-0159-4a6d-8ab0-d1be22fd45bb" />
-<img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 Pro - 2026-02-21 at 19 10 45" src="https://github.com/user-attachments/assets/2f854cdc-940f-4245-9809-a2a37f0608e9" />
-
+  <img src="https://github.com/user-attachments/assets/ae384474-0159-4a6d-8ab0-d1be22fd45bb" width="30%" />
+  <img src="https://github.com/user-attachments/assets/2f854cdc-940f-4245-9809-a2a37f0608e9" width="30%" />
 </p>
 
 
