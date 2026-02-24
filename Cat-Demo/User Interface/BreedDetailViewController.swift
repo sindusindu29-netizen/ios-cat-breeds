@@ -49,20 +49,8 @@ final class BreedDetailViewController: UIViewController {
             ]
         )
         
-        // Ratings section (0–5 values)
-        raingsLabel.attributedText = makeSection(
-            items: [
-                ("Intelligence", rating(breed?.intelligence)),
-                ("Energy", rating(breed?.energy_level)),
-                ("Affection", rating(breed?.affection_level)),
-                ("Adaptability", rating(breed?.adaptability)),
-                ("Child friendly", rating(breed?.child_friendly)),
-                ("Dog friendly", rating(breed?.dog_friendly)),
-                ("Grooming", rating(breed?.grooming)),
-                ("Social needs", rating(breed?.social_needs)),
-                ("Shedding", rating(breed?.shedding_level))
-            ]
-        )
+        // Added images
+        raingsLabel.attributedText = makeRatingsSection()
         
         wikipediaButton.isHidden = (breed?.wikipedia_url == nil)
     }
@@ -83,6 +71,77 @@ final class BreedDetailViewController: UIViewController {
               let url = URL(string: urlString) else { return }
         UIApplication.shared.open(url)
     }
+    
+    private func configureRatingImage(for value: Int?) -> UIImage? {
+        guard let value else { return nil }
+        
+        let name: String
+        switch value {
+        case 1: name = "0-poor"
+        case 2: name = "1-fair"
+        case 3: name = "0-good"
+        case 4: name = "3-very-good"
+        case 5: name = "4-excellent"
+        default: return nil
+        }
+        
+        return UIImage(named: name)
+    }
+    
+    func makeRatingsSection() -> NSAttributedString {
+          let paragraph = NSMutableParagraphStyle()
+          paragraph.lineSpacing = 3
+
+          let result = NSMutableAttributedString()
+
+          // Build list of rating fields (0–5)
+          let items: [(String, Int?)] = [
+              ("Intelligence", breed?.intelligence),
+              ("Energy", breed?.energy_level),
+              ("Affection", breed?.affection_level),
+              ("Adaptability", breed?.adaptability),
+              ("Child friendly", breed?.child_friendly),
+              ("Dog friendly", breed?.dog_friendly),
+              ("Grooming", breed?.grooming),
+              ("Social needs", breed?.social_needs),
+              ("Shedding", breed?.shedding_level)
+          ]
+
+          for (key, value) in items {
+              // Key (regular)
+              let keyAttrs: [NSAttributedString.Key: Any] = [
+                  .font: UIFont.preferredFont(forTextStyle: .subheadline),
+                  .foregroundColor: UIColor.label
+              ]
+              result.append(NSAttributedString(string: "\(key): ", attributes: keyAttrs))
+
+              // Value as image (or fallback)
+              if let img = configureRatingImage(for: value) {
+                  let attachment = NSTextAttachment()
+                  attachment.image = img
+
+                  // Make image align nicely with text
+                  let font = UIFont.preferredFont(forTextStyle: .subheadline)
+                  let imgHeight = font.capHeight + 6 // tweak if needed
+                  let ratio = img.size.width / max(img.size.height, 1)
+                  attachment.bounds = CGRect(x: 0, y: (font.descender - 2), width: imgHeight * ratio, height: imgHeight)
+
+                  result.append(NSAttributedString(attachment: attachment))
+              } else {
+                  // If nil / unexpected value
+                  let valueAttrs: [NSAttributedString.Key: Any] = [
+                      .font: UIFont.preferredFont(forTextStyle: .subheadline),
+                      .foregroundColor: UIColor.secondaryLabel
+                  ]
+                  result.append(NSAttributedString(string: "—", attributes: valueAttrs))
+              }
+
+              result.append(NSAttributedString(string: "\n"))
+          }
+
+          result.addAttribute(.paragraphStyle, value: paragraph, range: NSRange(location: 0, length: result.length))
+          return result
+      }
     
 }
 
